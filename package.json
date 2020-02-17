@@ -1,0 +1,11 @@
+{
+  "name": "visualizer2",
+  "version": "1.0.0",
+  "description": "visualizer using three.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Dan Photon",
+  "license": "ISC"
+}
