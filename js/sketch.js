@@ -124,9 +124,11 @@ let angleAdd = 0.0;
 ampAdd = 0;
 
 /// COUNTERS FOR TIME RELATED ACTIONS
+// How many summons
 let tcount01 = 0;
-const TCOUNT01 = 1;
+const TCOUNT01 = 0.8;
 
+// How many normalisation checks
 let tcount02 = 0;
 const TCOUNT02 = 0.5;
 
@@ -181,6 +183,9 @@ const SPEC_MAX_FACT = 0.2;
 
 // Controls the spectrum amp
 const SPEC_SIDE_FACT = 10;
+const SPEC_AMP_FACT = 1;
+
+let specFac;
 
 let animate = function (now) {
     // PRE
@@ -257,7 +262,23 @@ let animate = function (now) {
     for (let i = 0; i < objArr.length; i++) {
         let c = objArr[i];
         let phi = c.angle + angleAdd;
-        let a = c.amp + ampAdd + AMP_BIAS * Math.pow(level + AMP_OFF, AMP_EXP);
+
+
+        let phiMod = phi % (2 * pi);
+        let freq = 0;
+        let specMax = spectrum.length * SPEC_MAX_FACT;
+
+        if (phiMod <= pi) {
+            freq = map(phiMod, 0, pi, SPEC_MIN, specMax);
+        } else {
+            freq = map(phiMod, pi, 2*pi, specMax, SPEC_MIN);
+        }
+
+        freq = Math.floor(freq);
+        specFac = spectrum[freq] / 255.0;
+
+        let a = c.amp + ampAdd + AMP_BIAS * Math.pow(level + AMP_OFF, AMP_EXP) + SPEC_AMP_FACT * specFac;
+
 
         c.mesh.rotation.z = -phi;
         c.mesh.rotation.x += rotAdd;
@@ -272,19 +293,14 @@ let animate = function (now) {
         c.color[2] = 1-level;
         c.color[0] = level;
 
-        let phiMod = phi % (2 * pi);
-        let freq = 0;
-        let specMax = spectrum.length * SPEC_MAX_FACT;
 
-        if (phiMod <= pi) {
-            freq = map(phiMod, 0, pi, SPEC_MIN, specMax);
-        } else {
-            freq = map(phiMod, pi, 2*pi, specMax, SPEC_MIN);
-        }
 
-        freq = Math.floor(freq);
 
-        c.color[1] = spectrum[freq] / 255;
+
+        c.color[1] = specFac;
+        c.color[0] = 1 - specFac;
+
+
 
 
         let sideAmp = 1 + Math.pow(level + SIDE_AMP_OFF, SIDE_AMP_EXP) * SIDE_AMP_BIAS + (spectrum[freq] / 255) * SPEC_SIDE_FACT;
